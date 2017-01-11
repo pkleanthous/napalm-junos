@@ -24,41 +24,31 @@ def diff(templates_path, template_file, confg_file, expected_config):
     ENV = jinja2.Environment(loader=jinja2.FileSystemLoader(
         templates_path))
 
-    if not os.path.exists(".jinja2_spec"):
-        os.mkdir(".jinja2_spec", 0o755)
-
     with open(confg_file) as config:
         config = yaml.load(config)
 
     template = ENV.get_template(template_file)
     output = template.render(config)
 
-    f = open('.jinja2_spec/.tmpfile', 'w')
-    f.write(output)
-    f.close()
+    tmp_list = []
+    tmp_list = output.splitlines()
 
-    generated_cfg = open(".jinja2_spec/.tmpfile", "r").readlines()
     expected_cfg = open(expected_config, "r").readlines()
 
-    d = difflib.Differ()
-    diffs = d.compare(expected_cfg, generated_cfg)
     lineNum = 0
     error_count = 0
 
-    for line in diffs:
-        opcode = line[:2]
-        if opcode == "- ":
-            expected_line = (line[2:].strip())
-        if opcode in ("  ", "+ "):
-            lineNum += 1
-        if opcode == "+ ":
+    for expected_line in expected_cfg:
+        expected_line = expected_line.strip('\n')
+        if expected_line != tmp_list[lineNum]:
             tmp_text = "In Line: %d" % lineNum
             print(colorama.Fore.GREEN + colorama.Style.NORMAL + tmp_text)
             tmp_text = "Expected: %s" % expected_line
             print(colorama.Fore.GREEN + colorama.Style.NORMAL + tmp_text)
-            tmp_text = "Got:      %s" % (line[2:].strip())
+            tmp_text = "Got:      %s" % tmp_list[lineNum]
             print(colorama.Fore.RED + colorama.Style.NORMAL + tmp_text)
             error_count += 1
+        lineNum += 1
 
     if error_count == 0:
         tmp_text = "You are awesome! jinja2 spec passed successfully"
@@ -70,6 +60,3 @@ def diff(templates_path, template_file, confg_file, expected_config):
     elapsed_time = time.time() - start_timestamp
     tmp_text = "Elapsed Time: %.3f Seconds\n" % elapsed_time
     print(colorama.Fore.GREEN + colorama.Style.NORMAL + tmp_text)
-
-    if os.path.exists(".jinja2_spec"):
-        shutil.rmtree(".jinja2_spec")
