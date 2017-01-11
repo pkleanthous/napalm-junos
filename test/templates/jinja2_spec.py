@@ -12,7 +12,7 @@ def diff(templates_path, template_file, confg_file, expected_config):
 
     start_timestamp = time.time()
 
-    tmp_text = "Running jinja2Spec...\n"
+    tmp_text = "\nRunning jinja2Spec...\n"
     print(colorama.Fore.GREEN + colorama.Style.NORMAL + tmp_text)
 
     tmp_text = "Template: %s Configuration file: %s Expected Configuration: %s\n" % (
@@ -32,6 +32,7 @@ def diff(templates_path, template_file, confg_file, expected_config):
 
     tmp_list = []
     tmp_list = output.splitlines()
+    tmp_list = [line for line in tmp_list if line.strip()]
 
     expected_cfg = open(expected_config, "r").readlines()
 
@@ -54,7 +55,7 @@ def diff(templates_path, template_file, confg_file, expected_config):
         tmp_text = "You are awesome! jinja2 spec passed successfully"
         print(colorama.Fore.YELLOW + colorama.Style.NORMAL + tmp_text)
     else:
-        tmp_text = "jinja2 spec found %d errors" % error_count
+        tmp_text = "jinja2 spec found %d error(s)" % error_count
         print(colorama.Fore.RED + colorama.Style.BRIGHT + tmp_text)
 
     elapsed_time = time.time() - start_timestamp
